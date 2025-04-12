@@ -1,0 +1,161 @@
+#+startup: nofold
+#+startup: hideblocks
+
+* Emacs
+** Package Archives
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
+  (add-to-list 'package-archives
+               '("melpa" . "https://melpa.org/packages/"))
+  (package-initialize)
+  ;; uncomment next line to refresh archives on startup
+  (package-refresh-contents)
+#+END_SRC
+
+** Defaults
+#+BEGIN_SRC emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+  (set-charset-priority 'unicode)
+  (setq locale-coding-system 'utf-8
+        coding-system-for-read 'utf-8
+        coding-system-for-write 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 4)
+  (when (eq system-type 'darwin)
+    (setq mac-command-modifier 'super)
+    (setq mac-option-modifier 'meta)
+    (setq mac-right-option-modifier 'none)
+    (setq mac-control-modifier 'control))
+#+END_SRC
+
+** Editor
+*** Disable UI elements
+#+BEGIN_SRC emacs-lisp
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (setq inhibit-splash-screen t)
+#+END_SRC
+
+*** Global keybindings
+#+BEGIN_SRC emacs-lisp
+  (keymap-global-set "M-o" 'other-window)
+  (which-key-mode)
+#+END_SRC
+
+*** Fonts
+#+BEGIN_SRC emacs-lisp
+  (set-frame-font "FiraCode Nerd Font Mono-14" nil t)
+#+END_SRC
+
+*** Line Numbers
+#+BEGIN_SRC emacs-lisp
+  (global-display-line-numbers-mode)
+  (setq display-line-numbers-type 'relative)
+#+END_SRC
+
+** Org-Mode
+#+BEGIN_SRC emacs-lisp
+  (setq org-directory "~/Documents/org")
+  (setq org-agenda-files
+        `(,(expand-file-name "agenda" org-directory)))
+  (setq org-indent-mode-turns-on-hiding-stars nil)
+  (add-hook 'org-mode-hook 'org-indent-mode)
+#+END_SRC
+* EVIL
+** Keybindings
+When in Org-Mode, bind `TAB` to the normal `org-cycle` command, to enable cycling through folding
+as well as working inside tables.
+
+Also set `j` and `k` for movement in org-agenda-mode. Move goto-date (originally `j`) to `d`.
+#+BEGIN_SRC emacs-lisp
+  (defun myconf/evil-org-bindings ()
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (evil-local-set-key 'normal (kbd "TAB") 'org-cycle)))
+    (add-hook 'org-agenda-mode-hook
+              (lambda ()
+                (evil-local-set-key 'emacs (kbd "j") 'org-agenda-next-line)
+                (evil-local-set-key 'emacs (kbd "k") 'org-agenda-previous-line)
+                (evil-local-set-key 'emacs (kbd "d") 'org-agenda-goto-date))))
+#+END_SRC
+
+When in Info mode, `RET` should go to the item at point.
+#+BEGIN_SRC emacs-lisp
+  (defun myconf/evil-info-bindings ()
+    (add-hook 'Info-mode-hook
+              (lambda ()
+                (evil-local-set-key 'motion (kbd "RET") 'Info-follow-nearest-node))))
+#+END_SRC
+
+When in Xref-Mode, `RET` should go to the item at point.
+#+BEGIN_SRC emacs-lisp
+  (defun myconf/evil-xref-bindings ()
+    (add-hook 'xref--xref-buffer-mode-hook
+              (lambda ()
+                (evil-local-set-key 'normal (kbd "RET") 'xref-goto-xref))))
+#+END_SRC
+
+** Apply config
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :ensure t
+    :init
+    (setq evil-want-C-u-scroll t)
+    :config
+    (myconf/evil-org-bindings)
+    (myconf/evil-info-bindings)
+    (myconf/evil-xref-bindings)
+    (evil-mode 1))
+#+END_SRC
+
+* Color-Theme
+#+BEGIN_SRC emacs-lisp
+  (use-package catppuccin-theme
+    :ensure t
+    :init
+    (setq catppuccin-flavor 'frappe)
+    :config
+    (load-theme 'catppuccin :no-confirm))
+#+END_SRC
+
+* Modeline + Nerd-Icons
+#+BEGIN_SRC emacs-lisp
+  (use-package nerd-icons
+    :ensure t)
+  (use-package doom-modeline
+    :ensure t
+    :config
+    (doom-modeline-mode 1))
+#+END_SRC
+
+* Company-Mode 
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :ensure t
+    :init
+    (add-hook 'after-init-hook 'global-company-mode))
+#+END_SRC
+
+* Eglot 
+We need to tell jdtls where it can find the Lombok-Jar.
+
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+                 '(java-mode . ("jdtls" "--jvm-arg=-javaagent:/Users/userk/Downloads/lombok.jar"))))
+#+END_SRC
+
+* Rust-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package rust-mode
+    :ensure t
+    :config
+    (add-hook 'rust-mode-hook 'eglot-ensure))
+#+END_SRC
+
+* TODO Avy-Mode
