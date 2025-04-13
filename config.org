@@ -62,6 +62,11 @@ The font is set through the ~default-frame-alist~ in [[./early-init.el][early-in
   (ido-everywhere)
 #+END_SRC
 
+*** Highlight current line 
+#+BEGIN_SRC emacs-lisp
+  (global-hl-line-mode)
+#+END_SRC
+
 ** Org-Mode
 #+BEGIN_SRC emacs-lisp
   (setq org-directory "~/Documents/org"
