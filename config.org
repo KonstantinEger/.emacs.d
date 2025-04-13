@@ -27,10 +27,10 @@
   (setq-default indent-tabs-mode nil)
   (setq-default tab-width 4)
   (when (eq system-type 'darwin)
-    (setq mac-command-modifier 'super)
+    (setq mac-command-modifier 'control)
     (setq mac-option-modifier 'meta)
     (setq mac-right-option-modifier 'none)
-    (setq mac-control-modifier 'control))
+    (setq mac-control-modifier 'super))
 #+END_SRC
 
 ** Editor
@@ -48,9 +48,7 @@
 #+END_SRC
 
 *** Fonts
-#+BEGIN_SRC emacs-lisp
-  (set-frame-font "FiraCode Nerd Font Mono-14" nil t)
-#+END_SRC
+The font is set through the ~default-frame-alist~ in [[./early-init.el][early-init.el]].
 
 *** Line Numbers
 #+BEGIN_SRC emacs-lisp
@@ -58,12 +56,18 @@
   (setq display-line-numbers-type 'relative)
 #+END_SRC
 
+*** Ido-Mode
+#+BEGIN_SRC emacs-lisp
+  (ido-mode 1)
+  (ido-everywhere)
+#+END_SRC
+
 ** Org-Mode
 #+BEGIN_SRC emacs-lisp
-  (setq org-directory "~/Documents/org")
-  (setq org-agenda-files
-        `(,(expand-file-name "agenda" org-directory)))
-  (setq org-indent-mode-turns-on-hiding-stars nil)
+  (setq org-directory "~/Documents/org"
+        org-agenda-files `(,(expand-file-name "agenda" org-directory))
+        org-indent-mode-turns-on-hiding-stars nil
+        org-agenda-include-diary nil)
   (add-hook 'org-mode-hook 'org-indent-mode)
 #+END_SRC
 * EVIL
@@ -100,6 +104,15 @@ When in Xref-Mode, `RET` should go to the item at point.
                 (evil-local-set-key 'normal (kbd "RET") 'xref-goto-xref))))
 #+END_SRC
 
+When in Magit-Status-Mode, enter emacs mode but rebind ~j~ and ~k~ for movement.
+#+BEGIN_SRC emacs-lisp
+  (defun myconf/evil-magit-bindings ()
+    (add-hook 'magit-status-mode-hook
+              (lambda ()
+                (evil-local-set-key 'emacs (kbd "j") 'magit-next-line)
+                (evil-local-set-key 'emacs (kbd "k") 'magit-previous-line))))
+#+END_SRC
+
 ** Apply config
 #+BEGIN_SRC emacs-lisp
   (use-package evil
@@ -110,6 +123,7 @@ When in Xref-Mode, `RET` should go to the item at point.
     (myconf/evil-org-bindings)
     (myconf/evil-info-bindings)
     (myconf/evil-xref-bindings)
+    (myconf/evil-magit-bindings)
     (evil-mode 1))
 #+END_SRC
 
@@ -156,6 +170,12 @@ We need to tell jdtls where it can find the Lombok-Jar.
     :ensure t
     :config
     (add-hook 'rust-mode-hook 'eglot-ensure))
+#+END_SRC
+
+* Magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :ensure t)
 #+END_SRC
 
 * TODO Avy-Mode
