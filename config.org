@@ -67,6 +67,11 @@ The font is set through the ~default-frame-alist~ in [[./early-init.el][early-in
   (global-hl-line-mode)
 #+END_SRC
 
+*** Matching Parens (Electric-Pair-Mode)
+#+BEGIN_SRC emacs-lisp
+  (electric-pair-mode)
+#+END_SRC
+
 ** Org-Mode
 #+BEGIN_SRC emacs-lisp
   (setq org-directory "~/Documents/org"
@@ -74,6 +79,13 @@ The font is set through the ~default-frame-alist~ in [[./early-init.el][early-in
         org-indent-mode-turns-on-hiding-stars nil
         org-agenda-include-diary nil)
   (add-hook 'org-mode-hook 'org-indent-mode)
+#+END_SRC
+** Appointments
+#+BEGIN_SRC emacs-lisp
+  (appt-activate 1)
+  (add-hook 'org-agenda-finalize-hook 'org-agenda-to-appt)
+  (setq myconf/org-agenda-timer
+        (run-at-time t (* 60 30) 'org-agenda-to-appt))
 #+END_SRC
 * EVIL
 ** Keybindings
@@ -120,16 +132,16 @@ When in Magit-Status-Mode, enter emacs mode but rebind ~j~ and ~k~ for movement.
 
 ** Apply config
 #+BEGIN_SRC emacs-lisp
-  (use-package evil
-    :ensure t
-    :init
-    (setq evil-want-C-u-scroll t)
-    :config
-    (myconf/evil-org-bindings)
-    (myconf/evil-info-bindings)
-    (myconf/evil-xref-bindings)
-    (myconf/evil-magit-bindings)
-    (evil-mode 1))
+  ;; (use-package evil
+  ;;   :ensure t
+  ;;   :init
+  ;;   (setq evil-want-C-u-scroll t)
+  ;;   :config
+  ;;   (myconf/evil-org-bindings)
+  ;;   (myconf/evil-info-bindings)
+  ;;   (myconf/evil-xref-bindings)
+  ;;   (myconf/evil-magit-bindings)
+  ;;   (evil-mode 1))
 #+END_SRC
 
 * Color-Theme
